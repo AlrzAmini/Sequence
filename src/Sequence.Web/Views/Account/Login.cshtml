@@ -1,0 +1,89 @@
+﻿<!-- Views/Account/Login.cshtml -->
+@model Sequence.Web.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "ورود";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-20">
+    <div class="w-full max-w-md">
+
+        <!-- Logo -->
+        <div class="text-center mb-10">
+            <div class="text-6xl mb-4">🎬</div>
+            <h1 class="text-3xl font-black text-white">سکانس</h1>
+            <p class="text-cinema-muted mt-2">به دفترچه سینمایی خود وارد شوید</p>
+        </div>
+
+        <div class="bg-cinema-card border border-cinema-border rounded-2xl p-8">
+            <form asp-action="Login" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div class="space-y-5">
+                    <div>
+                        <label asp-for="Email" class="input-label">ایمیل</label>
+                        <input asp-for="Email" type="email" class="input-field" dir="ltr"
+                               placeholder="email@example.com" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Password" class="input-label">رمز عبور</label>
+                        <div class="relative">
+                            <input asp-for="Password" type="password" class="input-field" dir="ltr"
+                                   placeholder="••••••••" autocomplete="current-password" id="passwordInput" />
+                            <button type="button" onclick="togglePassword()"
+                                    class="absolute left-3 top-1/2 -translate-y-1/2 text-cinema-muted hover:text-white transition-colors">
+                                👁️
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input asp-for="RememberMe" type="checkbox"
+                               class="w-4 h-4 rounded border-cinema-border bg-cinema-surface
+                                      accent-cinema-accent cursor-pointer" />
+                        <label asp-for="RememberMe" class="text-cinema-muted text-sm cursor-pointer">
+                            مرا به خاطر بسپار
+                        </label>
+                    </div>
+
+                    <!-- Server-side errors -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="bg-red-950/50 border border-red-900 rounded-lg px-4 py-3 text-cinema-red text-sm">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p>❌ @error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <button type="submit" class="btn-primary w-full py-3 text-base">
+                        ورود به حساب
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-cinema-border text-center">
+                <p class="text-cinema-muted text-sm">
+                    حساب ندارید؟
+                    <a asp-action="Register" class="text-cinema-accent hover:text-yellow-400 transition-colors font-medium">
+                        ثبت‌نام کنید
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+</script>
+}

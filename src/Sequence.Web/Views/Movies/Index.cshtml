@@ -1,0 +1,109 @@
+﻿<!-- Views/Movies/Index.cshtml -->
+@model List<Sequence.Web.ViewModels.Movies.MovieListViewModel>
+@{
+    ViewData["Title"] = "فیلم‌ها";
+    Layout = "_Layout";
+}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-black text-white">🎬 فیلم‌ها</h1>
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <a asp-action="Create" class="btn-primary flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                افزودن فیلم
+            </a>
+        }
+    </div>
+
+    @if (!Model.Any())
+    {
+        <!-- Empty State -->
+        <div class="text-center py-24">
+            <div class="text-7xl mb-6">🎭</div>
+            <h2 class="text-2xl font-bold text-white mb-3">هنوز فیلمی ثبت نشده</h2>
+            <p class="text-cinema-muted mb-8">اولین فیلمی که تماشا کرده‌اید را ثبت کنید</p>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a asp-action="Create" class="btn-primary">افزودن اولین فیلم</a>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Movie Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            @foreach (var movie in Model)
+            {
+                <div class="movie-card" onclick="window.location.href='@Url.Action("Detail", new { id = movie.Id })'">
+                    <!-- Poster -->
+                    <div class="relative overflow-hidden">
+                        @if (!string.IsNullOrEmpty(movie.PosterUrl))
+                        {
+                            <img src="@movie.PosterUrl"
+                                 alt="@movie.Title"
+                                 class="movie-card-poster"
+                                 onerror="this.parentElement.innerHTML = getPosterPlaceholder('@movie.Title')" />
+                        }
+                        else
+                        {
+                            <div class="poster-placeholder bg-cinema-surface">
+                                <span class="text-5xl">🎬</span>
+                            </div>
+                        }
+
+                        <!-- Rating overlay -->
+                        <div class="absolute top-2 right-2">
+                            @{
+                                var ratingClass = movie.PersonalRating >= 8 ? "rating-high"
+                                    : movie.PersonalRating >= 5 ? "rating-mid" : "rating-low";
+                            }
+                            <div class="rating-circle @ratingClass text-xs w-8 h-8">
+                                @movie.PersonalRating
+                            </div>
+                        </div>
+
+                        <!-- Hover overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                            flex items-end p-3">
+                            <div>
+                                <span class="genre-badge text-xs">@movie.GenreDisplay</span>
+                                @if (movie.ReviewCount > 0)
+                                {
+                                    <div class="text-xs text-cinema-muted mt-1">
+                                        💬 @movie.ReviewCount نقد
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="p-3">
+                        <h3 class="text-white text-sm font-semibold leading-tight line-clamp-2 mb-1">
+                            @movie.Title
+                        </h3>
+                        <p class="text-cinema-muted text-xs">@movie.ReleaseYear</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function getPosterPlaceholder(title) {
+            return `<div class="poster-placeholder bg-cinema-surface aspect-[2/3] flex flex-col items-center justify-center gap-2">
+                        <span class="text-4xl">🎬</span>
+                        <span class="text-cinema-muted text-xs text-center px-2">${title}</span>
+                    </div>`;
+        }
+    </script>
+}

@@ -1,0 +1,32 @@
+﻿<!-- Views/Shared/_MovieMiniCard.cshtml -->
+@model Sequence.Web.ViewModels.Movies.MovieListViewModel
+
+<div class="movie-card"
+     onclick="window.location.href='@Url.Action("Detail", "Movies", new { id = Model.Id })'">
+    <div class="relative overflow-hidden">
+        @if (!string.IsNullOrEmpty(Model.PosterUrl))
+        {
+            <img src="@Model.PosterUrl" alt="@Model.Title"
+                 class="movie-card-poster"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="poster-placeholder">
+                <span class="text-4xl">🎬</span>
+            </div>
+        }
+        <!-- Rating badge -->
+        <div class="absolute top-1.5 right-1.5">
+            @{
+                var cls = Model.PersonalRating >= 8 ? "rating-high"
+                    : Model.PersonalRating >= 5 ? "rating-mid" : "rating-low";
+            }
+            <div class="rating-circle @cls w-7 h-7 text-xs">@Model.PersonalRating</div>
+        </div>
+    </div>
+    <div class="p-2">
+        <p class="text-white text-xs font-medium leading-tight line-clamp-2">@Model.Title</p>
+        <p class="text-cinema-muted text-xs mt-0.5">@Model.ReleaseYear</p>
+    </div>
+</div>

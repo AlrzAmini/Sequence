@@ -1,0 +1,76 @@
+﻿<!-- Views/Account/Register.cshtml -->
+@model Sequence.Web.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "ثبت‌نام";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-20">
+    <div class="w-full max-w-md">
+
+        <div class="text-center mb-10">
+            <div class="text-6xl mb-4">🎬</div>
+            <h1 class="text-3xl font-black text-white">ثبت‌نام در سکانس</h1>
+            <p class="text-cinema-muted mt-2">دفترچه سینمایی شخصی خود را بسازید</p>
+        </div>
+
+        <div class="bg-cinema-card border border-cinema-border rounded-2xl p-8">
+            <form asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="space-y-5">
+                    <div>
+                        <label asp-for="DisplayName" class="input-label">نام نمایشی</label>
+                        <input asp-for="DisplayName" class="input-field"
+                               placeholder="مثال: علی سینمادوست" autocomplete="nickname" />
+                        <span asp-validation-for="DisplayName" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Email" class="input-label">ایمیل</label>
+                        <input asp-for="Email" type="email" class="input-field" dir="ltr"
+                               placeholder="email@example.com" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Password" class="input-label">رمز عبور</label>
+                        <input asp-for="Password" type="password" class="input-field" dir="ltr"
+                               placeholder="حداقل ۶ کاراکتر" autocomplete="new-password" />
+                        <span asp-validation-for="Password" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="ConfirmPassword" class="input-label">تکرار رمز عبور</label>
+                        <input asp-for="ConfirmPassword" type="password" class="input-field" dir="ltr"
+                               placeholder="رمز عبور را دوباره وارد کنید" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="bg-red-950/50 border border-red-900 rounded-lg px-4 py-3 text-cinema-red text-sm">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <p>❌ @error.ErrorMessage</p>
+                            }
+                        </div>
+                    }
+
+                    <button type="submit" class="btn-primary w-full py-3 text-base">
+                        🚀 ایجاد حساب
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-cinema-border text-center">
+                <p class="text-cinema-muted text-sm">
+                    حساب دارید؟
+                    <a asp-action="Login" class="text-cinema-accent hover:text-yellow-400 transition-colors font-medium">
+                        وارد شوید
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

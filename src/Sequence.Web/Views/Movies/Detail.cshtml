@@ -1,0 +1,243 @@
+﻿<!-- Views/Movies/Detail.cshtml -->
+@model Sequence.Web.ViewModels.Movies.MovieDetailViewModel
+@using Microsoft.AspNetCore.Identity
+@using Sequence.Web.Domain.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = UserManager.GetUserId(User);
+    var isOwner = currentUserId == Model.CreatedByUserId;
+    Layout = "_Layout";
+}
+
+<div class="max-w-5xl mx-auto px-4 py-10">
+
+    <!-- Back -->
+    <a asp-action="Index" class="text-cinema-muted hover:text-white text-sm flex items-center gap-2 mb-6 w-fit">
+        ← بازگشت به فیلم‌ها
+    </a>
+
+    <!-- Movie Hero -->
+    <div class="bg-cinema-card border border-cinema-border rounded-2xl overflow-hidden mb-10">
+        <div class="md:flex">
+            <!-- Poster -->
+            <div class="md:w-64 flex-shrink-0">
+                @if (!string.IsNullOrEmpty(Model.PosterUrl))
+                {
+                    <img src="@Model.PosterUrl" alt="@Model.Title"
+                         class="w-full h-full object-cover" style="min-height:300px" />
+                }
+                else
+                {
+                    <div class="w-full bg-cinema-surface flex items-center justify-center"
+                         style="min-height:300px">
+                        <span class="text-7xl">🎬</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 p-8">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="genre-badge">@Model.GenreDisplay</span>
+                            <span class="text-cinema-muted text-sm">@Model.ReleaseYear</span>
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-black text-white leading-tight">
+                            @Model.Title
+                        </h1>
+                        @if (!string.IsNullOrEmpty(Model.OriginalTitle))
+                        {
+                            <p class="text-cinema-muted mt-1" dir="ltr">@Model.OriginalTitle</p>
+                        }
+                    </div>
+
+                    <!-- Rating -->
+                    <div class="text-center">
+                        @{
+                            var ratingClass = Model.PersonalRating >= 8 ? "rating-high"
+                                : Model.PersonalRating >= 5 ? "rating-mid" : "rating-low";
+                        }
+                        <div class="rating-circle @ratingClass w-16 h-16 text-xl mx-auto mb-1">
+                            @Model.PersonalRating
+                        </div>
+                        <p class="text-xs text-cinema-muted">امتیاز شخصی</p>
+                    </div>
+                </div>
+
+                <!-- Stars visual -->
+                <div class="flex gap-1 mt-4">
+                    @for (int i = 1; i <= 10; i++)
+                    {
+                        <span class="text-sm @(i <= Model.PersonalRating ? "text-cinema-gold" : "text-cinema-border")">★</span>
+                    }
+                </div>
+
+                <!-- Short Review -->
+                @if (!string.IsNullOrEmpty(Model.ShortReview))
+                {
+                    <p class="text-cinema-text mt-5 leading-relaxed text-sm border-r-2 border-cinema-accent pr-4 italic">
+                        "@Model.ShortReview"
+                    </p>
+                }
+
+                <!-- Meta -->
+                <div class="flex flex-wrap gap-6 mt-6 text-sm text-cinema-muted">
+                    <div>
+                        📅 تماشا شده در:
+                        <span class="text-cinema-text">@Model.WatchedDate.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div>
+                        👤 ثبت شده توسط:
+                        <span class="text-cinema-text">@Model.CreatedByDisplayName</span>
+                    </div>
+                    <div>
+                        💬 @Model.Reviews.Count نقد
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                @if (isOwner)
+                {
+                    <div class="flex gap-3 mt-6">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-secondary text-sm">
+                            ✏️ ویرایش
+                        </a>
+                        <button onclick="confirmDelete(@Model.Id)" class="btn-danger text-sm">
+                            🗑️ حذف
+                        </button>
+                    </div>
+                }
+
+                <!-- Write Review -->
+                @if (SignInManager.IsSignedIn(User) && !Model.CurrentUserHasReviewed)
+                {
+                    <a asp-controller="Reviews" asp-action="Create"
+                       asp-route-movieId="@Model.Id"
+                       asp-route-movieTitle="@Model.Title"
+                       class="mt-4 inline-flex items-center gap-2 text-cinema-accent hover:text-yellow-400 text-sm transition-colors">
+                        ✍️ نوشتن نقد
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <section>
+        <h2 class="section-title">💬 نقدها</h2>
+
+        @if (!Model.Reviews.Any())
+        {
+            <div class="text-center py-12 bg-cinema-card border border-cinema-border rounded-xl">
+                <div class="text-4xl mb-3">✍️</div>
+                <p class="text-cinema-muted">هنوز نقدی نوشته نشده. اولین نفر باشید!</p>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-4">
+                @foreach (var review in Model.Reviews)
+                {
+                    <div class="bg-cinema-card border border-cinema-border rounded-xl p-6
+                        hover:border-cinema-border/80 transition-colors">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-cinema-accent/20 border border-cinema-accent/50
+                                    flex items-center justify-center text-cinema-accent font-bold text-sm">
+                                    @review.UserDisplayName.FirstOrDefault()
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white text-sm">@review.UserDisplayName</p>
+                                    <p class="text-xs text-cinema-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</p>
+                                </div>
+                            </div>
+
+                            @if (review.ContainsSpoiler)
+                            {
+                                <span class="text-xs bg-red-950 text-cinema-red border border-red-900 px-2 py-1 rounded-full">
+                                    ⚠️ اسپویلر
+                                </span>
+                            }
+                        </div>
+
+                        <div class="mt-4">
+                            @if (review.ContainsSpoiler)
+                            {
+                                <div class="spoiler-blur blur-sm hover:blur-none transition-all duration-300 cursor-pointer"
+                                     title="کلیک کنید تا اسپویلر نمایش داده شود">
+                                    <p class="text-cinema-text leading-relaxed text-sm line-clamp-3">
+                                        @review.Body
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-cinema-text leading-relaxed text-sm line-clamp-3">
+                                    @review.Body
+                                </p>
+                            }
+                        </div>
+
+                        <div class="flex items-center justify-between mt-4">
+                            <div class="flex items-center gap-4">
+                                <!-- Reactions -->
+                                <div class="flex gap-2">
+                                    <span class="text-xs text-cinema-muted flex items-center gap-1">
+                                        👍 @review.AgreeCount
+                                    </span>
+                                    <span class="text-xs text-cinema-muted flex items-center gap-1">
+                                        👎 @review.DisagreeCount
+                                    </span>
+                                </div>
+                                <!-- Comments count -->
+                                <span class="text-xs text-cinema-muted">💬 @review.CommentCount</span>
+                            </div>
+
+                            <a asp-controller="Reviews" asp-action="Detail"
+                               asp-route-id="@review.Id"
+                               class="text-cinema-accent hover:text-yellow-400 text-xs transition-colors">
+                                خواندن کامل ←
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-cinema-card border border-cinema-border rounded-2xl p-8 max-w-sm w-full mx-4 animate-slide-up">
+        <h3 class="text-xl font-bold text-white mb-3">🗑️ حذف فیلم</h3>
+        <p class="text-cinema-muted mb-6">آیا مطمئن هستید؟ این عمل قابل بازگشت نیست.</p>
+        <div class="flex gap-3">
+            <form asp-action="Delete" method="post" class="flex-1">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="deleteMovieId" />
+                <button type="submit" class="btn-danger w-full">بله، حذف کن</button>
+            </form>
+            <button onclick="closeDeleteModal()" class="btn-secondary">انصراف</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            document.getElementById('deleteMovieId').value = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+    </script>
+}

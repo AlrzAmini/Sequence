@@ -1,0 +1,62 @@
+﻿<!-- Views/Home/Index.cshtml -->
+@{
+    ViewData["Title"] = "خانه";
+    Layout = "_Layout";
+}
+
+<!-- Hero Section -->
+<section class="cinema-gradient min-h-[70vh] flex items-center relative overflow-hidden">
+    <!-- Background overlay pattern -->
+    <div class="absolute inset-0 opacity-5"
+         style="background-image: repeating-linear-gradient(45deg, #f5a623 0, #f5a623 1px, transparent 0, transparent 50%); background-size: 20px 20px;">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-20 relative z-10">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 bg-cinema-accent/10 border border-cinema-accent/30 rounded-full px-4 py-1.5 text-cinema-accent text-sm mb-6">
+                🎬 دفترچه شخصی سینمایی
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-6">
+                سکانس
+            </h1>
+            <p class="text-xl text-cinema-muted mb-10 leading-relaxed">
+                فیلم‌هایی که تماشا کرده‌اید را ثبت کنید، امتیاز دهید، نقد بنویسید
+                و با دوستانتان به اشتراک بگذارید
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a asp-controller="Account" asp-action="Register"
+                   class="btn-primary text-base px-8 py-3">
+                    🚀 شروع کنید
+                </a>
+                <a asp-controller="Movies" asp-action="Index"
+                   class="btn-secondary text-base px-8 py-3">
+                    🎥 مشاهده فیلم‌ها
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="max-w-7xl mx-auto px-4 py-24">
+    <h2 class="section-title">امکانات سکانس</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+        @foreach (var feature in new[] {
+            ("🎬", "ثبت فیلم", "فیلم‌هایی که تماشا کرده‌اید را با امتیاز و نقد شخصی ثبت کنید"),
+            ("📋", "لیست تماشا", "فیلم‌هایی که می‌خواهید ببینید را در لیست نگه دارید"),
+            ("⭐", "امتیازدهی", "به هر فیلم امتیاز ۱ تا ۱۰ بدهید و نظرتان را بنویسید"),
+            ("✍️", "نقد و بررسی", "نقدهای مفصل بنویسید و نظر دیگران را بخوانید"),
+            ("💬", "دیدگاه", "روی نقدها دیدگاه بگذارید و گفتگو کنید"),
+            ("📊", "آمار شخصی", "آمار و ارقام فیلم‌هایی که دیده‌اید را ببینید"),
+        })
+        {
+            <div class="bg-cinema-card border border-cinema-border rounded-xl p-6 hover:border-cinema-accent/50 transition-all duration-300 group">
+                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                    @feature.Item1
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2">@feature.Item2</h3>
+                <p class="text-cinema-muted text-sm leading-relaxed">@feature.Item3</p>
+            </div>
+        }
+    </div>
+</section>

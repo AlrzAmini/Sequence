@@ -1,0 +1,242 @@
+﻿<!-- Views/Reviews/Detail.cshtml -->
+@model Sequence.Web.ViewModels.Reviews.ReviewDetailViewModel
+@using Microsoft.AspNetCore.Identity
+@using Sequence.Web.Domain.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@{
+    ViewData["Title"] = "نقد — " + Model.MovieTitle;
+    Layout = "_Layout";
+}
+
+<div class="max-w-3xl mx-auto px-4 py-10">
+
+    <!-- Back to Movie -->
+    <a asp-controller="Movies" asp-action="Detail" asp-route-id="@Model.MovieId"
+       class="text-cinema-muted hover:text-white text-sm flex items-center gap-2 mb-6 w-fit">
+        ← بازگشت به @Model.MovieTitle
+    </a>
+
+    <!-- Review Card -->
+    <div class="bg-cinema-card border border-cinema-border rounded-2xl overflow-hidden mb-8">
+
+        <!-- Movie mini header -->
+        <div class="bg-cinema-surface border-b border-cinema-border px-6 py-4 flex items-center gap-4">
+            @if (!string.IsNullOrEmpty(Model.MoviePosterUrl))
+            {
+                <img src="@Model.MoviePosterUrl" alt="@Model.MovieTitle"
+                     class="w-12 h-16 object-cover rounded-lg" />
+            }
+            else
+            {
+                <div class="w-12 h-16 bg-cinema-border rounded-lg flex items-center justify-center">
+                    🎬
+                </div>
+            }
+            <div>
+                <a asp-controller="Movies" asp-action="Detail" asp-route-id="@Model.MovieId"
+                   class="text-cinema-accent hover:text-yellow-400 font-semibold transition-colors">
+                    @Model.MovieTitle
+                </a>
+                <p class="text-cinema-muted text-xs mt-0.5">نقد فیلم</p>
+            </div>
+        </div>
+
+        <!-- Review Body -->
+        <div class="p-8">
+            <!-- Author -->
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-cinema-accent/20 border border-cinema-accent/50
+                                flex items-center justify-center text-cinema-accent font-bold">
+                        @Model.AuthorDisplayName.FirstOrDefault()
+                    </div>
+                    <div>
+                        <p class="font-semibold text-white">@Model.AuthorDisplayName</p>
+                        <p class="text-xs text-cinema-muted">
+                            @Model.CreatedAt.ToString("dd MMMM yyyy")
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <span>(ویرایش شده)</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                @if (Model.ContainsSpoiler)
+                {
+                    <span class="text-xs bg-red-950 text-cinema-red border border-red-900 px-3 py-1 rounded-full">
+                        ⚠️ حاوی اسپویلر
+                    </span>
+                }
+            </div>
+
+            <!-- Body -->
+            <div class="prose prose-invert max-w-none">
+                <p class="text-cinema-text leading-loose text-base whitespace-pre-wrap">@Model.Body</p>
+            </div>
+
+            <!-- Reactions -->
+            <div class="flex items-center gap-3 mt-8 pt-6 border-t border-cinema-border">
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <button class="reaction-btn reaction-agree @(Model.CurrentUserReaction == "Agree" ? "active" : "")"
+                            id="btn-agree"
+                            onclick="react(@Model.Id, 'Agree')">
+                        👍 موافقم
+                        <span id="agree-count" class="font-bold">@Model.AgreeCount</span>
+                    </button>
+
+                    <button class="reaction-btn reaction-disagree @(Model.CurrentUserReaction == "Disagree" ? "active" : "")"
+                            id="btn-disagree"
+                            onclick="react(@Model.Id, 'Disagree')">
+                        👎 مخالفم
+                        <span id="disagree-count" class="font-bold">@Model.DisagreeCount</span>
+                    </button>
+                }
+                else
+                {
+                    <span class="text-cinema-muted text-sm flex items-center gap-2">
+                        👍 @Model.AgreeCount
+                        <span class="mx-1">·</span>
+                        👎 @Model.DisagreeCount
+                    </span>
+                }
+
+                <span class="flex-1"></span>
+
+                <!-- Author actions -->
+                @if (Model.CurrentUserIsAuthor)
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id"
+                       class="btn-ghost text-xs">✏️ ویرایش</a>
+
+                    <form asp-action="Delete" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="movieId" value="@Model.MovieId" />
+                        <button type="submit" class="btn-ghost text-xs text-cinema-red hover:text-red-400"
+                                onclick="return confirm('نقد حذف شود؟')">
+                            🗑️ حذف
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <section>
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            💬 دیدگاه‌ها
+            <span class="text-cinema-accent text-base">(@Model.Comments.Count)</span>
+        </h2>
+
+        <!-- Comment Form -->
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <form asp-controller="Comments" asp-action="Add" method="post" class="mb-8">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="reviewId" value="@Model.Id" />
+                <div class="flex gap-3">
+                    <textarea name="body" class="input-field resize-none flex-1" rows="3"
+                              placeholder="دیدگاه خود را بنویسید..." maxlength="500"></textarea>
+                    <button type="submit" class="btn-primary self-end px-5">
+                        ارسال
+                    </button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="bg-cinema-card border border-cinema-border rounded-xl p-6 text-center mb-8">
+                <p class="text-cinema-muted mb-3">برای ثبت دیدگاه وارد شوید</p>
+                <a asp-controller="Account" asp-action="Login" class="btn-primary text-sm">ورود به حساب</a>
+            </div>
+        }
+
+        <!-- Comments List -->
+        @if (!Model.Comments.Any())
+        {
+            <div class="text-center py-8 text-cinema-muted">
+                <div class="text-3xl mb-2">💭</div>
+                <p>هنوز دیدگاهی ثبت نشده</p>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-4">
+                @foreach (var comment in Model.Comments)
+                {
+                    <div class="bg-cinema-card border border-cinema-border rounded-xl p-5 animate-fade-in">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-cinema-surface border border-cinema-border
+                                            flex items-center justify-center text-cinema-muted text-sm font-bold">
+                                    @comment.AuthorDisplayName.FirstOrDefault()
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-white text-sm">@comment.AuthorDisplayName</p>
+                                    <p class="text-xs text-cinema-muted">@comment.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                                </div>
+                            </div>
+
+                            @if (comment.CurrentUserIsAuthor)
+                            {
+                                <form asp-controller="Comments" asp-action="Delete" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@comment.Id" />
+                                    <input type="hidden" name="reviewId" value="@Model.Id" />
+                                    <button type="submit" class="text-cinema-muted hover:text-cinema-red text-xs transition-colors"
+                                            onclick="return confirm('دیدگاه حذف شود؟')">
+                                        ✕
+                                    </button>
+                                </form>
+                            }
+                        </div>
+
+                        <p class="mt-3 text-cinema-text text-sm leading-relaxed">@comment.Body</p>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@section Scripts {
+<script>
+    const antiForgeryToken = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)[1];
+
+    function react(reviewId, type) {
+        $.ajax({
+            url: `/api/reactions/${reviewId}/${type}`,
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'RequestVerificationToken': antiForgeryToken
+            },
+            success: function(data) {
+                if (data.success) {
+                    // Update counts
+                    $('#agree-count').text(data.counts.agree);
+                    $('#disagree-count').text(data.counts.disagree);
+
+                    // Update active states
+                    $('#btn-agree').removeClass('active');
+                    $('#btn-disagree').removeClass('active');
+
+                    if (data.counts.userReaction === 'Agree') {
+                        $('#btn-agree').addClass('active');
+                    } else if (data.counts.userReaction === 'Disagree') {
+                        $('#btn-disagree').addClass('active');
+                    }
+
+                    showToast(data.message, 'success');
+                }
+            },
+            error: function() {
+                showToast('خطا در ثبت واکنش', 'error');
+            }
+        });
+    }
+</script>
+}

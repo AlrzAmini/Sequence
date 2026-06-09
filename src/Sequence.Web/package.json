@@ -1,0 +1,12 @@
+{
+  "name": "sequence",
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/dist/output.css",
+    "watch:css": "tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/dist/output.css --watch",
+    "build:css:prod": "tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/dist/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

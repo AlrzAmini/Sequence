@@ -1,0 +1,14 @@
+﻿<!-- Views/Shared/_Toast.cshtml -->
+@if (TempData["Success"] != null)
+{
+    <div id="toast-success" class="toast toast-success" role="alert">
+        ✅ @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div id="toast-error" class="toast toast-error" role="alert">
+        ❌ @TempData["Error"]
+    </div>
+}

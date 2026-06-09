@@ -1,0 +1,100 @@
+﻿<!-- Views/Watchlist/MarkWatched.cshtml -->
+@model Sequence.Web.ViewModels.Watchlist.MarkAsWatchedViewModel
+@{
+    ViewData["Title"] = "ثبت تماشا — " + Model.Title;
+    Layout = "_Layout";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="mb-8">
+        <a asp-action="Index" class="text-cinema-muted hover:text-white text-sm flex items-center gap-2 mb-4">
+            ← بازگشت به لیست تماشا
+        </a>
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">✅</span>
+            <div>
+                <h1 class="text-3xl font-black text-white">تماشا کردم!</h1>
+                <p class="text-cinema-muted">امتیاز و نظرتان را ثبت کنید</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-cinema-card border border-cinema-border rounded-2xl p-8">
+
+        <!-- Movie Preview -->
+        <div class="flex items-center gap-4 mb-8 p-4 bg-cinema-surface rounded-xl border border-cinema-border">
+            @if (!string.IsNullOrEmpty(Model.PosterUrl))
+            {
+                <img src="@Model.PosterUrl" alt="@Model.Title"
+                     class="w-12 h-16 object-cover rounded-lg" />
+            }
+            else
+            {
+                <div class="w-12 h-16 bg-cinema-border rounded-lg flex items-center justify-center">🎬</div>
+            }
+            <div>
+                <p class="font-bold text-white">@Model.Title</p>
+                @if (!string.IsNullOrEmpty(Model.OriginalTitle))
+                {
+                    <p class="text-cinema-muted text-sm" dir="ltr">@Model.OriginalTitle</p>
+                }
+            </div>
+        </div>
+
+        <form asp-action="MarkWatched" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="WatchlistItemId" />
+            <input type="hidden" asp-for="Title" />
+            <input type="hidden" asp-for="OriginalTitle" />
+            <input type="hidden" asp-for="PosterUrl" />
+            <input type="hidden" asp-for="Genre" />
+
+            <div class="space-y-6">
+
+                <!-- Rating Stars -->
+                <div>
+                    <label class="input-label">امتیاز شخصی (۱ تا ۱۰) *</label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 10; i >= 1; i--)
+                        {
+                            <span class="star text-3xl" data-value="@i">★</span>
+                        }
+                    </div>
+                    <input type="hidden" asp-for="PersonalRating" id="PersonalRating" />
+                    <span id="ratingDisplay" class="text-cinema-accent text-sm mt-2 block h-5"></span>
+                    <span asp-validation-for="PersonalRating" class="text-cinema-red text-xs block"></span>
+                </div>
+
+                <!-- Year -->
+                <div>
+                    <label asp-for="ReleaseYear" class="input-label">سال اکران</label>
+                    <input asp-for="ReleaseYear" type="number" class="input-field"
+                           min="1888" max="2100" />
+                </div>
+
+                <!-- Watched Date -->
+                <div>
+                    <label asp-for="WatchedDate" class="input-label">تاریخ تماشا *</label>
+                    <input asp-for="WatchedDate" type="date" class="input-field"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="WatchedDate" class="text-cinema-red text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Short Review -->
+                <div>
+                    <label asp-for="ShortReview" class="input-label">خلاصه نظر (اختیاری)</label>
+                    <textarea asp-for="ShortReview" class="input-field resize-none" rows="3"
+                              placeholder="در چند کلمه بگویید چه فکری می‌کنید..."
+                              maxlength="1000"></textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary flex-1">
+                        🎬 ثبت فیلم
+                    </button>
+                    <a asp-action="Index" class="btn-secondary">انصراف</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

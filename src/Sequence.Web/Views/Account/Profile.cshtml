@@ -1,0 +1,76 @@
+﻿<!-- Views/Account/Profile.cshtml -->
+@model Sequence.Web.ViewModels.Account.ProfileViewModel
+@{
+    ViewData["Title"] = "پروفایل";
+    Layout = "_Layout";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-black text-white mb-8">👤 پروفایل کاربری</h1>
+
+    <div class="bg-cinema-card border border-cinema-border rounded-2xl overflow-hidden">
+
+        <!-- Profile Header -->
+        <div class="bg-gradient-to-l from-cinema-accent/10 to-transparent border-b border-cinema-border p-8">
+            <div class="flex items-center gap-6">
+                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                {
+                    <img src="@Model.AvatarUrl" alt="آواتار"
+                         class="w-20 h-20 rounded-full object-cover border-2 border-cinema-accent" />
+                }
+                else
+                {
+                    <div class="w-20 h-20 rounded-full bg-cinema-accent/20 border-2 border-cinema-accent
+                        flex items-center justify-center text-cinema-accent text-3xl font-black">
+                        @Model.DisplayName.FirstOrDefault()
+                    </div>
+                }
+                <div>
+                    <h2 class="text-2xl font-bold text-white">@Model.DisplayName</h2>
+                    <p class="text-cinema-muted text-sm">
+                        عضو از @Model.JoinedAt.ToString("MMMM yyyy")
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="p-8">
+            <form asp-action="Profile" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="space-y-5">
+                    <div>
+                        <label asp-for="DisplayName" class="input-label">نام نمایشی *</label>
+                        <input asp-for="DisplayName" class="input-field" placeholder="نام نمایشی" />
+                        <span asp-validation-for="DisplayName" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="AvatarUrl" class="input-label">آدرس تصویر پروفایل</label>
+                        <input asp-for="AvatarUrl" class="input-field" dir="ltr"
+                               placeholder="https://example.com/avatar.jpg" />
+                        <span asp-validation-for="AvatarUrl" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Bio" class="input-label">
+                            درباره من
+                            <span class="text-cinema-muted font-normal">
+                                (@(Model.Bio?.Length ?? 0)/500)
+                            </span>
+                        </label>
+                        <textarea asp-for="Bio" class="input-field resize-none" rows="3"
+                                  placeholder="کمی درباره خودتان بنویسید..."
+                                  maxlength="500"></textarea>
+                        <span asp-validation-for="Bio" class="text-cinema-red text-xs mt-1 block"></span>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full">
+                        💾 ذخیره تغییرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+﻿<!-- Views/Shared/_Layout.cshtml -->
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" class="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " | " : "")سکانس</title>
+    <link rel="stylesheet" href="~/fonts/Vazirmatn-font-face.css" />
+    <link rel="stylesheet" href="~/dist/output.css" />
+    <link rel="icon" href="🎬" type="image/svg+xml">
+</head>
+<body class="bg-cinema-dark text-cinema-text font-persian antialiased">
+
+@await Html.PartialAsync("_Navbar")
+
+<!-- Toast Notifications -->
+@await Html.PartialAsync("_Toast")
+
+<!-- Main Content -->
+<main class="min-h-screen">
+    @RenderBody()
+</main>
+
+<!-- Footer -->
+<footer class="border-t border-cinema-border mt-20 py-10">
+    <div class="max-w-7xl mx-auto px-4 text-center text-cinema-muted text-sm">
+        <p class="mb-1">🎬 سکانس — دفترچه شخصی فیلم‌های من</p>
+        <p class="text-xs opacity-60">ساخته شده با ❤️ برای تو</p>
+    </div>
+</footer>
+
+<!-- jQuery -->
+    <script src="~/js/jquery-4.0.0.min.js"></script>
+<!-- App JS -->
+<script src="~/js/app.js"></script>
+<script src="~/js/toast.js"></script>
+<script src="~/js/rating.js"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

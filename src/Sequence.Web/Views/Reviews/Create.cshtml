@@ -1,0 +1,113 @@
+﻿@model Sequence.Web.ViewModels.Reviews.ReviewCreateViewModel
+@{
+    ViewData["Title"] = "نوشتن نقد";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="mb-8">
+        <a asp-controller="Movies" asp-action="Detail" asp-route-id="@Model.MovieId"
+           class="text-[#8888aa] hover:text-white text-sm flex items-center gap-2 mb-4 w-fit">
+            ← بازگشت به @Model.MovieTitle
+        </a>
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">✍️</span>
+            <div>
+                <h1 class="text-3xl font-black text-white">نوشتن نقد</h1>
+                <p class="text-[#8888aa] mt-1">@Model.MovieTitle</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-8">
+        <form asp-action="Create" method="post" id="reviewForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MovieId" />
+            <input type="hidden" asp-for="MovieTitle" />
+
+            <div class="space-y-6">
+
+                <!-- Review Body -->
+                <div>
+                    <label asp-for="Body" class="input-label">
+                        متن نقد *
+                        <span id="bodyCount" class="text-[#8888aa] font-normal">۰/۳۰۰۰</span>
+                    </label>
+                    <textarea asp-for="Body"
+                              class="input-field resize-none"
+                              rows="10"
+                              maxlength="3000"
+                              placeholder="نقد خود را بنویسید... چه چیزی در این فیلم برایتان جالب بود؟ داستان، کارگردانی، بازیگری..."
+                              oninput="updateCount('Body', 'bodyCount', 3000)"></textarea>
+                    <span asp-validation-for="Body" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Spoiler Warning -->
+                <div class="flex items-center gap-3 p-4 bg-[#1a1a2e] rounded-xl border border-[#1e1e2e]">
+                    <input asp-for="ContainsSpoiler"
+                           type="checkbox"
+                           class="w-5 h-5 rounded border-[#1e1e2e] cursor-pointer"
+                           id="spoilerCheck"
+                           style="accent-color: #f5a623" />
+                    <div>
+                        <label for="spoilerCheck" class="text-white font-medium cursor-pointer">
+                            ⚠️ این نقد حاوی اسپویلر است
+                        </label>
+                        <p class="text-[#8888aa] text-xs mt-0.5">
+                            اگر تیک بزنید، متن نقد به صورت محو نمایش داده می‌شود
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Server errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="bg-red-950/50 border border-red-900 rounded-lg px-4 py-3 text-red-400 text-sm">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <p>❌ @error.ErrorMessage</p>
+                        }
+                    </div>
+                }
+
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            class="btn-primary flex-1 flex items-center justify-center gap-2"
+                            id="submitBtn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M5 13l4 4L19 7" />
+                        </svg>
+                        ثبت نقد
+                    </button>
+                    <a asp-controller="Movies" asp-action="Detail" asp-route-id="@Model.MovieId"
+                       class="btn-secondary">
+                        انصراف
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateCount(fieldId, countId, max) {
+            const field = document.getElementById(fieldId);
+            const counter = document.getElementById(countId);
+            if (field && counter) {
+                counter.textContent = `${field.value.length}/${max}`;
+            }
+        }
+
+        document.getElementById('reviewForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg> در حال ثبت...`;
+        });
+    </script>
+}

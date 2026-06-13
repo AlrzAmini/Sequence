@@ -1,0 +1,141 @@
+﻿@model Sequence.Web.ViewModels.Watchlist.WatchlistAddViewModel
+@{
+    ViewData["Title"] = "افزودن به لیست تماشا";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="mb-8">
+        <a asp-action="Index" class="text-[#8888aa] hover:text-white text-sm flex items-center gap-2 mb-4 w-fit">
+            ← بازگشت به لیست تماشا
+        </a>
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">📋</span>
+            <div>
+                <h1 class="text-3xl font-black text-white">افزودن به لیست تماشا</h1>
+                <p class="text-[#8888aa] mt-1">فیلمی که می‌خواهید ببینید را اضافه کنید</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-8">
+        <form asp-action="Add" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-6">
+
+                <!-- Movie Title -->
+                <div>
+                    <label asp-for="MovieTitle" class="input-label">عنوان فیلم *</label>
+                    <input asp-for="MovieTitle"
+                           class="input-field"
+                           placeholder="مثال: اوپنهایمر" />
+                    <span asp-validation-for="MovieTitle" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Original Title -->
+                <div>
+                    <label asp-for="OriginalTitle" class="input-label">عنوان اصلی (اختیاری)</label>
+                    <input asp-for="OriginalTitle"
+                           class="input-field"
+                           dir="ltr"
+                           placeholder="Oppenheimer" />
+                    <span asp-validation-for="OriginalTitle" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Poster URL -->
+                <div>
+                    <label asp-for="PosterUrl" class="input-label">آدرس پوستر (اختیاری)</label>
+                    <input asp-for="PosterUrl"
+                           class="input-field"
+                           dir="ltr"
+                           placeholder="https://example.com/poster.jpg"
+                           oninput="previewPoster(this.value)" />
+                    <span asp-validation-for="PosterUrl" class="text-red-400 text-xs mt-1 block"></span>
+
+                    <!-- Poster Preview -->
+                    <div id="posterPreview" class="mt-3 hidden">
+                        <img id="posterImg"
+                             class="w-24 h-36 object-cover rounded-lg border border-[#1e1e2e]"
+                             alt="پیش‌نمایش پوستر" />
+                    </div>
+                </div>
+
+                <!-- Year + Genre -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="ReleaseYear" class="input-label">سال اکران (اختیاری)</label>
+                        <input asp-for="ReleaseYear"
+                               type="number"
+                               class="input-field"
+                               min="1888"
+                               max="2100"
+                               placeholder="2024" />
+                        <span asp-validation-for="ReleaseYear" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Genre" class="input-label">ژانر</label>
+                        <select asp-for="Genre"
+                                asp-items="ViewBag.Genres"
+                                class="input-field">
+                            <option value="0">انتخاب ژانر</option>
+                        </select>
+                        <span asp-validation-for="Genre" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label asp-for="Notes" class="input-label">
+                        یادداشت (اختیاری)
+                        <span id="notesCount" class="text-[#8888aa] font-normal">۰/۵۰۰</span>
+                    </label>
+                    <textarea asp-for="Notes"
+                              class="input-field resize-none"
+                              rows="3"
+                              maxlength="500"
+                              placeholder="چرا می‌خواهید این فیلم را ببینید؟ توصیه کسی بود؟"
+                              oninput="updateCount('Notes', 'notesCount', 500)"></textarea>
+                    <span asp-validation-for="Notes" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 4v16m8-8H4" />
+                        </svg>
+                        افزودن به لیست
+                    </button>
+                    <a asp-action="Index" class="btn-secondary">انصراف</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewPoster(url) {
+            const preview = document.getElementById('posterPreview');
+            const img = document.getElementById('posterImg');
+            if (url && url.startsWith('http')) {
+                img.src = url;
+                img.onload = () => preview.classList.remove('hidden');
+                img.onerror = () => preview.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        function updateCount(fieldId, countId, max) {
+            const field = document.getElementById(fieldId);
+            const counter = document.getElementById(countId);
+            if (field && counter) {
+                counter.textContent = `${field.value.length}/${max}`;
+            }
+        }
+    </script>
+}

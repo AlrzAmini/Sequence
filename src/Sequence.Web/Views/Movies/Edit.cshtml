@@ -1,0 +1,168 @@
+﻿@model Sequence.Web.ViewModels.Movies.MovieEditViewModel
+@{
+    ViewData["Title"] = "ویرایش فیلم";
+}
+
+<div class="max-w-2xl mx-auto px-4 py-10">
+    <div class="mb-8">
+        <a asp-action="Detail" asp-route-id="@Model.Id"
+           class="text-[#8888aa] hover:text-white text-sm flex items-center gap-2 mb-4 w-fit">
+            ← بازگشت به جزئیات فیلم
+        </a>
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">✏️</span>
+            <div>
+                <h1 class="text-3xl font-black text-white">ویرایش فیلم</h1>
+                <p class="text-[#8888aa] mt-1">@Model.Title</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-[#12121a] border border-[#1e1e2e] rounded-2xl p-8">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" id="editForm">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-6">
+
+                <!-- Title -->
+                <div>
+                    <label asp-for="Title" class="input-label">عنوان فارسی *</label>
+                    <input asp-for="Title" class="input-field" placeholder="عنوان فیلم" />
+                    <span asp-validation-for="Title" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Original Title -->
+                <div>
+                    <label asp-for="OriginalTitle" class="input-label">عنوان اصلی (اختیاری)</label>
+                    <input asp-for="OriginalTitle" class="input-field" dir="ltr"
+                           placeholder="Original Title" />
+                    <span asp-validation-for="OriginalTitle" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Poster URL -->
+                <div>
+                    <label asp-for="PosterUrl" class="input-label">آدرس پوستر (اختیاری)</label>
+                    <input asp-for="PosterUrl" class="input-field" dir="ltr"
+                           placeholder="https://example.com/poster.jpg"
+                           oninput="previewPoster(this.value)" />
+                    <span asp-validation-for="PosterUrl" class="text-red-400 text-xs mt-1 block"></span>
+
+                    <!-- Poster Preview -->
+                    <div id="posterPreview" class="mt-3 @(string.IsNullOrEmpty(Model.PosterUrl) ? "hidden" : "")">
+                        <img id="posterImg"
+                             src="@Model.PosterUrl"
+                             class="w-24 h-36 object-cover rounded-lg border border-[#1e1e2e]"
+                             alt="پوستر" />
+                    </div>
+                </div>
+
+                <!-- Year + Genre -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="ReleaseYear" class="input-label">سال اکران *</label>
+                        <input asp-for="ReleaseYear" type="number" class="input-field"
+                               min="1888" max="2100" />
+                        <span asp-validation-for="ReleaseYear" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Genre" class="input-label">ژانر *</label>
+                        <select asp-for="Genre" asp-items="ViewBag.Genres" class="input-field">
+                            <option value="">انتخاب ژانر</option>
+                        </select>
+                        <span asp-validation-for="Genre" class="text-red-400 text-xs mt-1 block"></span>
+                    </div>
+                </div>
+
+                <!-- Personal Rating -->
+                <div>
+                    <label class="input-label">امتیاز شخصی (۱ تا ۱۰) *</label>
+                    <div class="star-rating" id="starRating">
+                        @for (int i = 10; i >= 1; i--)
+                        {
+                            <span class="star @(i <= Model.PersonalRating ? "active" : "")"
+                                  data-value="@i">★</span>
+                        }
+                    </div>
+                    <input type="hidden" asp-for="PersonalRating" id="PersonalRating" />
+                    <span id="ratingDisplay" class="text-[#f5a623] text-sm mt-1 block h-5"></span>
+                    <span asp-validation-for="PersonalRating" class="text-red-400 text-xs block"></span>
+                </div>
+
+                <!-- Watched Date -->
+                <div>
+                    <label asp-for="WatchedDate" class="input-label">تاریخ تماشا *</label>
+                    <input asp-for="WatchedDate" type="date" class="input-field"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="WatchedDate" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Short Review -->
+                <div>
+                    <label asp-for="ShortReview" class="input-label">
+                        خلاصه نظر (اختیاری)
+                        <span id="shortReviewCount" class="text-[#8888aa] font-normal">
+                            @(Model.ShortReview?.Length ?? 0)/1000
+                        </span>
+                    </label>
+                    <textarea asp-for="ShortReview"
+                              class="input-field resize-none"
+                              rows="4"
+                              maxlength="1000"
+                              placeholder="در چند جمله درباره این فیلم بنویسید..."
+                              oninput="updateCount('ShortReview', 'shortReviewCount', 1000)"></textarea>
+                    <span asp-validation-for="ShortReview" class="text-red-400 text-xs mt-1 block"></span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            class="btn-primary flex-1 flex items-center justify-center gap-2"
+                            id="submitBtn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M5 13l4 4L19 7" />
+                        </svg>
+                        ذخیره تغییرات
+                    </button>
+                    <a asp-action="Detail" asp-route-id="@Model.Id" class="btn-secondary">
+                        انصراف
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewPoster(url) {
+            const preview = document.getElementById('posterPreview');
+            const img = document.getElementById('posterImg');
+            if (url && url.startsWith('http')) {
+                img.src = url;
+                img.onload = () => preview.classList.remove('hidden');
+                img.onerror = () => preview.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        function updateCount(fieldId, countId, max) {
+            const field = document.getElementById(fieldId);
+            const counter = document.getElementById(countId);
+            if (field && counter) {
+                counter.textContent = `${field.value.length}/${max}`;
+            }
+        }
+
+        document.getElementById('editForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg> در حال ذخیره...`;
+        });
+    </script>
+}
